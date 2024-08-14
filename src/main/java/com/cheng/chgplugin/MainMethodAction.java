@@ -11,11 +11,13 @@ import com.intellij.openapi.roots.ModuleRootManager;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.module.Module;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Objects;
@@ -58,25 +60,44 @@ public class MainMethodAction extends AnAction {
                 throw new RuntimeException(ex);
             }
         });
-        /*buttonEntry.setIcon(new ImageIcon("images/logo.png"));
-        buttonEntry.setRolloverIcon(new ImageIcon("images/logo.png"));
-        buttonEntry.setRolloverEnabled(true);*/
+        buttonEntry.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                // 设置按钮的最大大小
+                Dimension buttonSize = new Dimension(300, 150); // 按钮的宽度和高度
+                // 读取图片并调整大小以完全适应按钮
+                ImageIcon hoverImage = createScaledImageIcon("/images/test.jpeg", buttonSize.width, buttonSize.height);
+                buttonEntry.setPreferredSize(buttonSize);
+                buttonEntry.setMinimumSize(buttonSize);
+                buttonEntry.setMaximumSize(buttonSize);
+                // 当鼠标悬浮时显示缩放后的图片
+                buttonEntry.setIcon(hoverImage);
+            }
+            @Override
+            public void mouseExited(MouseEvent e) {
+                Dimension buttonSize = new Dimension(130, 30); // 按钮的宽度和高度
+                buttonEntry.setPreferredSize(buttonSize);
+                buttonEntry.setMinimumSize(buttonSize);
+                buttonEntry.setMaximumSize(buttonSize);
+                buttonEntry.setIcon(null);
+            }
+        });
         panel.add(buttonEntry);
         frame.getContentPane().add(panel, BorderLayout.CENTER);
         frame.pack(); // 自动调整大小以适应内容
         int height = frame.getHeight(); // 获取当前高度
-        frame.setSize(180, height);
+        int width = frame.getWidth(); // 获取当前宽度
+        frame.setSize(width, height);
         frame.setVisible(true);
     }
 
     private static void showDialogAndCreateJSON(String moduleRootPath, String actionDir) throws IOException {
-        //ComboBox<String> addressField = new ComboBox<>(new String[]{"api", "ui"}); // 示例选项
+        /*String[] strings = {"api", "ui"};
+        ComboBox<String> addressField = new ComboBox<>(strings);*/
         JTextField tableNameField = new JTextField(20);
         JTextField fileNameField = new JTextField(20);
         JTextField titleNameField = new JTextField(20);
         JPanel panel = new JPanel(new GridLayout(0, 1));
-        /*panel.add(new JLabel(moduleRootPath));
-        panel.add(new JLabel(actionDir));*/
         panel.add(new JLabel("数据库表名:"));
         panel.add(tableNameField);
         panel.add(new JLabel("目标文件名称:"));
@@ -98,19 +119,33 @@ public class MainMethodAction extends AnAction {
             }
             String message = EntryTemplate.makeEntry(actionDir, fileName,titleName, tableName, dbColumnList);
             JOptionPane.showMessageDialog(null, message);
-            /*try {
-                JSONObject json = new JSONObject();
-                Path filePath = Paths.get(address, fileName + ".json");
-                Files.createDirectories(filePath.getParent());
-                try (FileWriter fileWriter = new FileWriter(filePath.toString())) {
-                    fileWriter.write(json.toString()); // 4 is the number of spaces for indentation
-                    fileWriter.flush();
-                }
-                JOptionPane.showMessageDialog(null, "Creating file created successfully!!!");
-            } catch (IOException e) {
-                JOptionPane.showMessageDialog(null, "Error creating file:" + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-                e.printStackTrace();
-            }*/
+        }
+    }
+    private static ImageIcon createScaledImageIcon(String path, int buttonWidth, int buttonHeight) {
+        try {
+            // 读取原始图片
+            BufferedImage originalImage = ImageIO.read(Objects.requireNonNull(MainMethodAction.class.getResource(path)));
+            int originalWidth = originalImage.getWidth();
+            int originalHeight = originalImage.getHeight();
+            // 计算缩放比例
+            double widthRatio = (double) buttonWidth / originalWidth;
+            double heightRatio = (double) buttonHeight / originalHeight;
+            double scaleFactor = Math.min(widthRatio, heightRatio); // 选择最小比例以确保图片完全显示
+            // 计算缩放后的宽度和高度
+            int scaledWidth = (int) (originalWidth * scaleFactor);
+            int scaledHeight = (int) (originalHeight * scaleFactor);
+            // 创建缩放后的图片
+            Image scaledImage = originalImage.getScaledInstance(scaledWidth, scaledHeight, Image.SCALE_SMOOTH);
+            BufferedImage bufferedScaledImage = new BufferedImage(buttonWidth, buttonHeight, BufferedImage.TYPE_INT_ARGB);
+            // 将缩放后的图片绘制到新创建的图像上，保持图片居中
+            Graphics2D g2d = bufferedScaledImage.createGraphics();
+            g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+            g2d.drawImage(scaledImage, (buttonWidth - scaledWidth) / 2+5, (buttonHeight - scaledHeight) / 2, null);
+            g2d.dispose();
+            return new ImageIcon(bufferedScaledImage);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
         }
     }
 }
