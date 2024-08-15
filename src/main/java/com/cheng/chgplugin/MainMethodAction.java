@@ -55,7 +55,7 @@ public class MainMethodAction extends AnAction {
         JButton buttonEntry = new JButton("创建入口界面");
         buttonEntry.addActionListener(e -> {
             try {
-                showDialogAndCreateJSON(moduleRootPath, actionDir);
+                showDialogAndMakeEntry(1,moduleRootPath, actionDir);
             } catch (IOException ex) {
                 throw new RuntimeException(ex);
             }
@@ -91,7 +91,7 @@ public class MainMethodAction extends AnAction {
         frame.setVisible(true);
     }
 
-    private static void showDialogAndCreateJSON(String moduleRootPath, String actionDir) throws IOException {
+    private static void showDialogAndMakeEntry(int fileType,String moduleRootPath, String actionDir) throws IOException {
         /*String[] strings = {"api", "ui"};
         ComboBox<String> addressField = new ComboBox<>(strings);*/
         JTextField tableNameField = new JTextField(20);
@@ -117,7 +117,18 @@ public class MainMethodAction extends AnAction {
                 JOptionPane.showMessageDialog(null, "该ui组件下不存在表: "+tableName);
                 return;
             }
-            String message = EntryTemplate.makeEntry(actionDir, fileName,titleName, tableName, dbColumnList);
+            String message="";
+            switch (fileType) {
+                case 1:
+                    message = EntryTemplate.makeEntry(actionDir, fileName,titleName, tableName, dbColumnList);
+                    break;
+                case 2:
+                    message = "Value is 2";
+                    break;
+                case 3:
+                    message = "Value is 3";
+                    break;
+            }
             JOptionPane.showMessageDialog(null, message);
         }
     }
