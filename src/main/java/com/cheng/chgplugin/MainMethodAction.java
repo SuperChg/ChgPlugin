@@ -47,7 +47,7 @@ public class MainMethodAction extends AnAction {
     }
 
     private static void createAndShowGUI(String moduleRootPath, String actionDir) {
-        JFrame frame = new JFrame();
+        JFrame frame = new JFrame("选择创建的界面类型");
         frame.setLocationRelativeTo(null);
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         JPanel panel = new JPanel();
@@ -140,7 +140,7 @@ public class MainMethodAction extends AnAction {
             // 将缩放后的图片绘制到新创建的图像上，保持图片居中
             Graphics2D g2d = bufferedScaledImage.createGraphics();
             g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-            g2d.drawImage(scaledImage, (buttonWidth - scaledWidth) / 2+5, (buttonHeight - scaledHeight) / 2, null);
+            g2d.drawImage(scaledImage, (buttonWidth - scaledWidth) / 2+7, (buttonHeight - scaledHeight) / 2, null);
             g2d.dispose();
             return new ImageIcon(bufferedScaledImage);
         } catch (IOException e) {
