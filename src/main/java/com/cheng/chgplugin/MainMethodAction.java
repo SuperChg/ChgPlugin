@@ -10,6 +10,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ModuleRootManager;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.module.Module;
+import com.intellij.ui.JBColor;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -24,7 +25,7 @@ import java.util.Objects;
 import java.util.List;
 
 public class MainMethodAction extends AnAction {
-
+    static JProgressBar progressBar;
     @Override
     public void actionPerformed(AnActionEvent e) {
         // TODO: insert action logic here
@@ -53,9 +54,10 @@ public class MainMethodAction extends AnAction {
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
         JButton buttonEntry = new JButton("创建入口界面");
+        Dimension buttonSizeInit = new Dimension(130, 30); // 按钮的宽度和高度
         buttonEntry.addActionListener(e -> {
             try {
-                showDialogAndMakeEntry(1,moduleRootPath, actionDir);
+                showDialogAndMake(1,moduleRootPath, actionDir);
             } catch (IOException ex) {
                 throw new RuntimeException(ex);
             }
@@ -75,13 +77,18 @@ public class MainMethodAction extends AnAction {
             }
             @Override
             public void mouseExited(MouseEvent e) {
-                Dimension buttonSize = new Dimension(130, 30); // 按钮的宽度和高度
-                buttonEntry.setPreferredSize(buttonSize);
-                buttonEntry.setMinimumSize(buttonSize);
-                buttonEntry.setMaximumSize(buttonSize);
+                buttonEntry.setPreferredSize(buttonSizeInit);
+                buttonEntry.setMinimumSize(buttonSizeInit);
+                buttonEntry.setMaximumSize(buttonSizeInit);
                 buttonEntry.setIcon(null);
             }
         });
+        progressBar = new JProgressBar(JProgressBar.HORIZONTAL,0,100);
+        progressBar.setForeground(Color.WHITE);
+        progressBar.setStringPainted(true);
+        progressBar.setBorderPainted(true);
+        progressBar.setVisible(false);
+        panel.add(progressBar);
         panel.add(buttonEntry);
         frame.getContentPane().add(panel, BorderLayout.CENTER);
         frame.pack(); // 自动调整大小以适应内容
@@ -91,7 +98,7 @@ public class MainMethodAction extends AnAction {
         frame.setVisible(true);
     }
 
-    private static void showDialogAndMakeEntry(int fileType,String moduleRootPath, String actionDir) throws IOException {
+    private static void showDialogAndMake(int fileType,String moduleRootPath, String actionDir) throws IOException {
         /*String[] strings = {"api", "ui"};
         ComboBox<String> addressField = new ComboBox<>(strings);*/
         JTextField tableNameField = new JTextField(20);
@@ -107,20 +114,25 @@ public class MainMethodAction extends AnAction {
         int result = JOptionPane.showConfirmDialog(null, panel,
                 "我是你的神吗o.O?", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
         if (result == JOptionPane.OK_OPTION) {
+            progressBar.setVisible(true);
+            progressBar.setValue(0);
             String tableName = tableNameField.getText();
             String fileName = fileNameField.getText();
             String titleName = titleNameField.getText();
             List<String> tgtTableNames = new ArrayList<>();
             tgtTableNames.add(tableName);
+            progressBar.setValue(20);
             List<Map<String, Object>> dbColumnList = ReadXmlFiles.analysisDatabase(moduleRootPath, tgtTableNames);
             if(dbColumnList.size()==0){
                 JOptionPane.showMessageDialog(null, "该ui组件下不存在表: "+tableName);
                 return;
             }
+            progressBar.setValue(40);
             String message="";
             switch (fileType) {
                 case 1:
                     message = EntryTemplate.makeEntry(actionDir, fileName,titleName, tableName, dbColumnList);
+                    progressBar.setValue(100);
                     break;
                 case 2:
                     message = "Value is 2";
@@ -129,7 +141,10 @@ public class MainMethodAction extends AnAction {
                     message = "Value is 3";
                     break;
             }
+            //progressBar.setVisible(false);
             JOptionPane.showMessageDialog(null, message);
+            progressBar.setValue(0);
+            progressBar.setVisible(false);
         }
     }
     private static ImageIcon createScaledImageIcon(String path, int buttonWidth, int buttonHeight) {
@@ -151,7 +166,7 @@ public class MainMethodAction extends AnAction {
             // 将缩放后的图片绘制到新创建的图像上，保持图片居中
             Graphics2D g2d = bufferedScaledImage.createGraphics();
             g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-            g2d.drawImage(scaledImage, (buttonWidth - scaledWidth) / 2+7, (buttonHeight - scaledHeight) / 2, null);
+            g2d.drawImage(scaledImage, (buttonWidth - scaledWidth) / 2, (buttonHeight - scaledHeight) / 2, null);
             g2d.dispose();
             return new ImageIcon(bufferedScaledImage);
         } catch (IOException e) {

@@ -56,7 +56,11 @@ public class ReadXmlFiles {
                                             } else if (columnType.contains("SMALLINT")) {
                                                 sqltype = "4";
                                             } else if (columnType.contains("DATE")) {
-                                                sqltype = "91";
+                                                if(columnName.equals("predate")||columnName.equals("modifydate")||columnName.equals("submitdate")||columnName.equals("performdate")||columnName.equals("ratifydate")){
+                                                    sqltype = "93";
+                                                }else{
+                                                    sqltype = "91";
+                                                }
                                             } else {
                                                 sqltype = "12";
                                             }
@@ -65,8 +69,10 @@ public class ReadXmlFiles {
                                         }
                                     }
                                 }
-                                List.add(hashMap);
-                                tgtTableNames.remove(tableName);
+                                if (hashMap.size() > 0) {
+                                    List.add(hashMap);
+                                    tgtTableNames.remove(tableName);
+                                }
                                 if (tgtTableNames.size() == 0) {
                                     break;
                                 }
