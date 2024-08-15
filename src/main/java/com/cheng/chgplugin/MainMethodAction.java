@@ -66,7 +66,7 @@ public class MainMethodAction extends AnAction {
                 // 设置按钮的最大大小
                 Dimension buttonSize = new Dimension(300, 150); // 按钮的宽度和高度
                 // 读取图片并调整大小以完全适应按钮
-                ImageIcon hoverImage = createScaledImageIcon("/images/test.jpeg", buttonSize.width, buttonSize.height);
+                ImageIcon hoverImage = createScaledImageIcon("/images/entry.png", buttonSize.width, buttonSize.height);
                 buttonEntry.setPreferredSize(buttonSize);
                 buttonEntry.setMinimumSize(buttonSize);
                 buttonEntry.setMaximumSize(buttonSize);
