@@ -26,6 +26,7 @@ import java.util.List;
 
 public class MainMethodAction extends AnAction {
     static JProgressBar progressBar;
+
     @Override
     public void actionPerformed(AnActionEvent e) {
         // TODO: insert action logic here
@@ -40,7 +41,7 @@ public class MainMethodAction extends AnAction {
         String moduleRootPath = ModuleRootManager.getInstance(module).getContentRoots()[0].getPath();
         //02
         String actionDir = virtualFile.getPath();
-        if(!moduleRootPath.endsWith("-ui")){
+        if (!moduleRootPath.endsWith("-ui")) {
             JOptionPane.showMessageDialog(null, "选择ui组件下的目录!");
             return;
         }
@@ -57,7 +58,7 @@ public class MainMethodAction extends AnAction {
         Dimension buttonSizeInit = new Dimension(130, 30); // 按钮的宽度和高度
         buttonEntry.addActionListener(e -> {
             try {
-                showDialogAndMake(1,moduleRootPath, actionDir);
+                showDialogAndMakeEntry(1, moduleRootPath, actionDir);
             } catch (IOException ex) {
                 throw new RuntimeException(ex);
             }
@@ -75,6 +76,7 @@ public class MainMethodAction extends AnAction {
                 // 当鼠标悬浮时显示缩放后的图片
                 buttonEntry.setIcon(hoverImage);
             }
+
             @Override
             public void mouseExited(MouseEvent e) {
                 buttonEntry.setPreferredSize(buttonSizeInit);
@@ -83,7 +85,7 @@ public class MainMethodAction extends AnAction {
                 buttonEntry.setIcon(null);
             }
         });
-        progressBar = new JProgressBar(JProgressBar.HORIZONTAL,0,100);
+        progressBar = new JProgressBar(JProgressBar.HORIZONTAL, 0, 100);
         progressBar.setForeground(Color.WHITE);
         progressBar.setStringPainted(true);
         progressBar.setBorderPainted(true);
@@ -98,7 +100,7 @@ public class MainMethodAction extends AnAction {
         frame.setVisible(true);
     }
 
-    private static void showDialogAndMake(int fileType,String moduleRootPath, String actionDir) throws IOException {
+    private static void showDialogAndMakeEntry(int fileType, String moduleRootPath, String actionDir) throws IOException {
         /*String[] strings = {"api", "ui"};
         ComboBox<String> addressField = new ComboBox<>(strings);*/
         JTextField tableNameField = new JTextField(20);
@@ -123,30 +125,20 @@ public class MainMethodAction extends AnAction {
             tgtTableNames.add(tableName);
             progressBar.setValue(20);
             List<Map<String, Object>> dbColumnList = ReadXmlFiles.analysisDatabase(moduleRootPath, tgtTableNames);
-            if(dbColumnList.size()==0){
-                JOptionPane.showMessageDialog(null, "该ui组件下不存在表: "+tableName);
+            if (dbColumnList.size() == 0) {
+                JOptionPane.showMessageDialog(null, "该ui组件下不存在表: " + tableName);
                 return;
             }
             progressBar.setValue(40);
-            String message="";
-            switch (fileType) {
-                case 1:
-                    message = EntryTemplate.makeEntry(actionDir, fileName,titleName, tableName, dbColumnList);
-                    progressBar.setValue(100);
-                    break;
-                case 2:
-                    message = "Value is 2";
-                    break;
-                case 3:
-                    message = "Value is 3";
-                    break;
-            }
+            String message = EntryTemplate.makeEntry(actionDir, fileName, titleName, tableName, dbColumnList);
+            progressBar.setValue(100);
             //progressBar.setVisible(false);
             JOptionPane.showMessageDialog(null, message);
             progressBar.setValue(0);
             progressBar.setVisible(false);
         }
     }
+
     private static ImageIcon createScaledImageIcon(String path, int buttonWidth, int buttonHeight) {
         try {
             // 读取原始图片
