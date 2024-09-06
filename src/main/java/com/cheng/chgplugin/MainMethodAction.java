@@ -26,6 +26,7 @@ import java.util.List;
 
 public class MainMethodAction extends AnAction {
     static JProgressBar progressBar;
+    static Dimension buttonSizeInit = new Dimension(130, 30);
 
     @Override
     public void actionPerformed(AnActionEvent e) {
@@ -55,34 +56,13 @@ public class MainMethodAction extends AnAction {
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
         JButton buttonEntry = new JButton("创建入口界面");
-        Dimension buttonSizeInit = new Dimension(130, 30); // 按钮的宽度和高度
+        buttonEntry.setPreferredSize(buttonSizeInit);
+        initButtonMouse(buttonEntry, "/images/entry.png");
         buttonEntry.addActionListener(e -> {
             try {
-                showDialogAndMakeEntry(1, moduleRootPath, actionDir);
+                showDialogAndMakeEntry(moduleRootPath, actionDir);
             } catch (IOException ex) {
                 throw new RuntimeException(ex);
-            }
-        });
-        buttonEntry.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseEntered(MouseEvent e) {
-                // 设置按钮的最大大小
-                Dimension buttonSize = new Dimension(300, 150); // 按钮的宽度和高度
-                // 读取图片并调整大小以完全适应按钮
-                ImageIcon hoverImage = createScaledImageIcon("/images/entry.png", buttonSize.width, buttonSize.height);
-                buttonEntry.setPreferredSize(buttonSize);
-                buttonEntry.setMinimumSize(buttonSize);
-                buttonEntry.setMaximumSize(buttonSize);
-                // 当鼠标悬浮时显示缩放后的图片
-                buttonEntry.setIcon(hoverImage);
-            }
-
-            @Override
-            public void mouseExited(MouseEvent e) {
-                buttonEntry.setPreferredSize(buttonSizeInit);
-                buttonEntry.setMinimumSize(buttonSizeInit);
-                buttonEntry.setMaximumSize(buttonSizeInit);
-                buttonEntry.setIcon(null);
             }
         });
         progressBar = new JProgressBar(JProgressBar.HORIZONTAL, 0, 100);
@@ -96,11 +76,32 @@ public class MainMethodAction extends AnAction {
         frame.pack(); // 自动调整大小以适应内容
         int height = frame.getHeight(); // 获取当前高度
         int width = frame.getWidth(); // 获取当前宽度
-        frame.setSize(width, height);
+        frame.setSize(500, 400);
         frame.setVisible(true);
     }
 
-    private static void showDialogAndMakeEntry(int fileType, String moduleRootPath, String actionDir) throws IOException {
+    private static void initButtonMouse(JButton button, String imagePath) {
+        button.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                // 设置按钮的最大大小
+                Dimension buttonSize = new Dimension(350, 180); // 按钮的宽度和高度
+                // 读取图片并调整大小以完全适应按钮
+                ImageIcon hoverImage = createScaledImageIcon(imagePath, buttonSize.width, buttonSize.height);
+                button.setPreferredSize(buttonSize);
+                // 当鼠标悬浮时显示缩放后的图片
+                button.setIcon(hoverImage);
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                button.setPreferredSize(buttonSizeInit);
+                button.setIcon(null);
+            }
+        });
+    }
+
+    private static void showDialogAndMakeEntry(String moduleRootPath, String actionDir) throws IOException {
         /*String[] strings = {"api", "ui"};
         ComboBox<String> addressField = new ComboBox<>(strings);*/
         JTextField tableNameField = new JTextField(20);
@@ -116,20 +117,22 @@ public class MainMethodAction extends AnAction {
         int result = JOptionPane.showConfirmDialog(null, panel,
                 "我是你的神吗o.O?", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
         if (result == JOptionPane.OK_OPTION) {
-            progressBar.setVisible(true);
-            progressBar.setValue(0);
-            String tableName = tableNameField.getText();
-            String fileName = fileNameField.getText();
-            String titleName = titleNameField.getText();
+            String tableName = tableNameField.getText().trim();
+            String fileName = fileNameField.getText().trim();
+            String titleName = titleNameField.getText().trim();
+            if(tableName.isEmpty()||fileName.isEmpty()||titleName.isEmpty()){
+                JOptionPane.showMessageDialog(null, "表单字段不可为空!");
+                return;
+            }
             List<String> tgtTableNames = new ArrayList<>();
             tgtTableNames.add(tableName);
-            progressBar.setValue(20);
             List<Map<String, Object>> dbColumnList = ReadXmlFiles.analysisDatabase(moduleRootPath, tgtTableNames);
             if (dbColumnList.size() == 0) {
                 JOptionPane.showMessageDialog(null, "该ui组件下不存在表: " + tableName);
                 return;
             }
-            progressBar.setValue(40);
+            progressBar.setVisible(true);
+            progressBar.setValue(50);
             String message = EntryTemplate.makeEntry(actionDir, fileName, titleName, tableName, dbColumnList);
             progressBar.setValue(100);
             //progressBar.setVisible(false);
